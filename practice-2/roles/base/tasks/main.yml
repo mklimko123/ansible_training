@@ -1,0 +1,34 @@
+- name: ensure a list of packages installed
+  yum:
+    name: "{{ packages }}"
+    state: present
+
+- name: install pip packages
+  pip:
+    name: "{{ pip_packages }}"
+
+- name: install psutils
+  pip:
+    name: psutil
+
+
+- name: ensure requiretty is disabled
+  copy:
+    dest: /etc/sudoers.d/all
+    force: no
+    content: |
+             Defaults !requiretty
+
+- name: ensure directory for ansible facts exists
+  file: 
+    state: directory
+    recurse: yes
+    path: /etc/ansible/facts.d
+
+- name: update permissions on facts folder
+  file:
+    path: /etc/ansible/facts.d
+    owner: devops
+    group: devops
+    recurse: yes
+    mode: '0755'

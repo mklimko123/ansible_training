@@ -1,0 +1,53 @@
+- name: create group mysql-check
+  group:
+    name: mysql-check
+    state: present
+
+- name: create user mysql-check
+  user:
+    name: mysql-check
+    group: mysql-check
+    state: present
+
+- name: create directory for mysql-check service
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - /opt/mysql-check/bin/
+    - /opt/mysql-check/conf/
+
+- name: download mysql-check binary file
+  get_url:
+    url: https://playpit-labs-assets.s3-eu-west-1.amazonaws.com/mysql-check/mysql-check
+    dest: /opt/mysql-check/bin/
+
+- name: create config file
+  copy:
+    dest: /opt/mysql-check/conf/mysql-check.config
+    force: no
+    content: "PORT={{ mysql_check_port }}\n"
+  notify:
+  - restart mysql-check
+
+- name: update permissions
+  file:
+    path: /opt/mysql-check
+    owner: mysql-check
+    group: mysql-check
+    recurse: yes
+    mode: '0755'
+
+- name: copy systemd unit mysql-check
+  template:
+    src: mysql-check.service.j2
+    dest: /etc/systemd/system/mysql-check.service
+  notify:
+  - restart mysql-check
+
+- name: start mysql-check
+  systemd:
+    name: mysql-check
+    enabled: yes
+    state: started
+    daemon_reload: yes

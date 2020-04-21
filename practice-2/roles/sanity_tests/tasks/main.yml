@@ -1,0 +1,22 @@
+- name: verify msg-service is listening on {{ msg_service_port }}
+  wait_for: 
+    port: "{{ msg_service_port }}"
+    timeout: 1
+
+- name: verify mysql-check is listening on {{ mysql_check_port }}
+  wait_for:
+    port: "{{ mysql_check_port }}"
+    timeout: 1
+
+- name: check root connection to mysql
+  shell: "mysql -u root --password={{ mysql_root_password }} -e 'SHOW DATABASES;'"
+  register: mysql_conn_result
+  changed_when: false
+  failed_when: 'mysql_conn_result.rc != 0'
+
+- name: verify {{ mysql_db_user_database }} database exists
+  shell: "mysql -u root --password={{ mysql_root_password }} -e 'SHOW DATABASES;' | grep {{ mysql_db_user_database }}"
+  register: db_result
+  changed_when: false
+  failed_when: 'db_result.rc != 0'
+

@@ -1,0 +1,47 @@
+- name: check mysql root password is defined
+  assert:
+    that:
+      - mysql_root_password is defined
+    fail_msg: "Failed: mysql root password not provided"
+    success_msg: "Success: mysql root password is defined"
+
+- name: download mysql repo
+  get_url: 
+    url: https://repo.mysql.com/mysql80-community-release-el7-3.noarch.rpm 
+    dest: /tmp/mysql80-community-release-el7-3.noarch.rpm
+
+- name: gather the rpm package facts
+  package_facts:
+    manager: auto
+
+- name: install mysql repo
+  shell: /bin/rpm -Uvh /tmp/mysql80-community-release-el7-3.noarch.rpm
+  when: "'mysql80-community-release' not in ansible_facts.packages "
+
+- name: install mysql-community-server
+  yum:
+    name: mysql-community-server
+    enablerepo: mysql80-community
+    state: present
+
+- name: initialize mysql
+  shell: mysqld --initialize-insecure --user=mysql
+  changed_when: false
+  failed_when: false
+
+- name: enable mysqld service
+  systemd:
+    name: mysqld
+    state: started
+    enabled: yes
+
+- name: check if root password is set
+  shell: >
+    mysqladmin -u root status
+  changed_when: false
+  failed_when: false
+  register: root_pwd_check
+
+- name: set root password
+  shell: echo "ALTER USER 'root'@'localhost' IDENTIFIED BY '{{ mysql_root_password }}';" | mysql -u root --skip-password
+  when: root_pwd_check.rc == 0

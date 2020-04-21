@@ -1,0 +1,3 @@
+---
+# defaults file for mysql-check
+mysql_check_port: 8081

@@ -1,0 +1,17 @@
+- hosts: nodes
+
+  gather_facts: yes
+  gather_subset: all
+  become: yes
+
+  vars:
+    student_first_name: Mikhail
+    student_last_name: Klimko
+  
+  roles:
+  - base
+  - user
+  - msg-service
+  - mysql_db_user
+  - mysql-check
+  - sanity_tests

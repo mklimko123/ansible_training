@@ -1,0 +1,16 @@
+---
+# defaults file for base
+packages:
+- epel-release
+- python
+- python-pip
+- python-devel
+- gcc
+- curl
+- wget
+- sudo
+- iproute
+
+pip_packages:
+- PyMySQL
+- cryptography

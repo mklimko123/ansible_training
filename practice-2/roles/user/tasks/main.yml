@@ -1,0 +1,17 @@
+- name: ensure group exists
+  group:
+    name: "{{ user_group }}"
+    gid: "{{ user_gid }}"
+    state: present
+
+- name: ensure user exists
+  user:
+    name: "{{ user_name }}"
+    uid: "{{ user_id }}"
+    group: "{{ user_group }}"
+
+- name: grant user sudo permission
+  template:
+    src: user.sudoers.j2
+    dest: /etc/sudoers.d/{{ user_name }}
+  when: user_sudo_privs|bool          

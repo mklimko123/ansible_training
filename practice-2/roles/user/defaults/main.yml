@@ -1,0 +1,7 @@
+---
+# defaults file for user
+user_name: mklimko
+user_id: 1003
+user_group: student
+user_gid: 1003
+user_sudo_privs: yes

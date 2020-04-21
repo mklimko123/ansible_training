@@ -1,0 +1,5 @@
+---
+# defaults file for mysql_db_user
+mysql_user: mklimko
+mysql_user_password: "12345"
+mysql_db_user_database: mklimko_db

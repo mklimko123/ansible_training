@@ -1,0 +1,5 @@
+- name: restart msg-service
+  systemd:
+    name: msg-service
+    state: restarted
+    daemon_reload: yes

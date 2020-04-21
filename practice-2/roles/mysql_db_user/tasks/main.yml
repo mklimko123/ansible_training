@@ -1,0 +1,27 @@
+- name: check mandatory variables are defined
+  assert:
+    that:
+      - mysql_root_password is defined
+      - mysql_user is defined
+      - mysql_user_password is defined
+      - mysql_db_user_database is defined
+    fail_msg: "Failed: mandatory variables aren't defined"
+    success_msg: "Success: mandatory variables are defined"
+
+- name: create new database
+  mysql_db:
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    name: "{{ mysql_db_user_database }}"
+    state: present
+
+- name: create db user
+  mysql_user:
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    name: "{{ mysql_user }}"
+    password: "{{ mysql_user_password }}"
+    update_password: on_create
+    priv: "{{ mysql_db_user_database }}.*:ALL"
+    state: present
+  no_log: true  
