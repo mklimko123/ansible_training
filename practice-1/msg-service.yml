@@ -29,7 +29,7 @@
 
   - name: Copy config file
     copy:
-      src: ./files/msg-service.config
+      src: msg-service.config
       dest: /opt/msg-service/conf/
     notify:
     - Restart msg-service
@@ -44,7 +44,7 @@
 
   - name: Copy systemd unit
     copy:
-      src: ./files/msg-service.service
+      src: msg-service.service
       dest: /etc/systemd/system/
     notify:
     - Restart msg-service
