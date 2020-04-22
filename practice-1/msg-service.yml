@@ -1,0 +1,64 @@
+- name: Msg Service Playbook
+  hosts: nodes
+  become: yes
+
+  tasks:
+  - name: Create group msg-service
+    group:
+      name: msg-service
+      state: present
+
+  - name: Create user msg-service
+    user:
+      name: msg-service
+      group: msg-service
+      state: present
+
+  - name: Create directory for msg-service
+    file:
+      path: "{{ item }}"
+      state: directory
+    with_items:
+      - /opt/msg-service/bin/
+      - /opt/msg-service/conf/
+
+  - name: Download file
+    get_url:
+      url: https://playpit-labs-assets.s3-eu-west-1.amazonaws.com/msg-service/msg-server
+      dest: /opt/msg-service/bin/
+
+  - name: Copy config file
+    copy:
+      src: ./files/msg-service.config
+      dest: /opt/msg-service/conf/
+    notify:
+    - Restart msg-service
+
+  - name: Update permissions
+    file:
+      path: /opt/msg-service/
+      owner: msg-service
+      group: msg-service
+      recurse: yes
+      mode: '0755'
+
+  - name: Copy systemd unit
+    copy:
+      src: ./files/msg-service.service
+      dest: /etc/systemd/system/
+    notify:
+    - Restart msg-service
+
+  - name: Start msg-service
+    systemd:
+      name: msg-service
+      enabled: yes
+      state: started
+      daemon_reload: yes
+
+  handlers:
+  - name: Restart msg-service
+    systemd:
+      name: msg-service
+      state: restarted
+      daemon_reload: yes
