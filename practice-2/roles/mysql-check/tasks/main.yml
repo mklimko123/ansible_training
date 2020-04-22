@@ -3,7 +3,7 @@
     name: "{{ mysql_check_group }}" 
     state: present
 
-- name: create user mysql-check
+- name: create user {{ mysql_check_user }}
   user:
     name: "{{ mysql_check_user }}"
     group: "{{ mysql_check_group }}"
