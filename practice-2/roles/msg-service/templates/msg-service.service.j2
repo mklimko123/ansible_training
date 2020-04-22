@@ -4,8 +4,8 @@ After=network.target
 
 [Service]
 Type=simple
-User=msg-service
-Group=msg-service
+User={{ msg_service_user }}
+Group={{ msg_service_group }}
 EnvironmentFile=-{{ msg_service_home }}/conf/msg-service.config
 ExecStart={{ msg_service_home }}/bin/msg-server
 ExecStop=/bin/kill -s QUIT $MAINPID
