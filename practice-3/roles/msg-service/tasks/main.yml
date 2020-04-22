@@ -1,0 +1,57 @@
+- name: create group "{{ msg_service_group }}"
+  group:
+    name: "{{ msg_service_group }}"
+    state: present
+
+- name: create user "{{ msg_service_user }}"
+  user:
+    name: "{{ msg_service_user }}"
+    group: "{{ msg_service_group }}"
+    state: present
+
+- name: create directory for msg-service
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - '{{ msg_service_home }}/bin'
+    - '{{ msg_service_home }}/conf'
+
+- name: download binary file
+  get_url:
+    url: "{{ msg_service_url  }}"
+    dest: '{{ msg_service_home }}/bin'
+
+- name: copy config file
+  template:
+    src: msg-service.config.j2
+    dest: '{{ msg_service_home }}/conf/msg-service.config'
+  notify: restart msg-service
+
+- name: update permissions
+  file:
+    path: "{{ msg_service_home }}"
+    owner: "{{ msg_service_user }}"
+    group: "{{ msg_service_group }}"
+    recurse: yes
+    mode: '0755'
+
+- name: copy systemd unit
+  template:
+    src: msg-service.service.j2
+    dest: /etc/systemd/system/msg-service.service
+  register: msg_service_conf
+
+- name: start msg-service
+  systemd:
+    name: msg-service
+    enabled: yes
+    state: started
+    daemon_reload: yes
+
+- name: restart msg-service
+  systemd:
+    name: msg-service
+    state: restarted
+    daemon_reload: yes
+  when: msg_service_conf is changed

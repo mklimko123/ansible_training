@@ -1,0 +1,58 @@
+- name: create group {{ mysql_check_group }}
+  group:
+    name: "{{ mysql_check_group }}" 
+    state: present
+
+- name: create user {{ mysql_check_user }}
+  user:
+    name: "{{ mysql_check_user }}"
+    group: "{{ mysql_check_group }}"
+    state: present
+
+- name: create directory for mysql-check service
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - '{{ mysql_check_home }}/bin/'
+    - '{{ mysql_check_home }}/conf/'
+
+- name: download mysql-check binary file
+  get_url:
+    url: '{{ mysql_check_url }}'
+    dest: '{{ mysql_check_home }}/bin/'
+
+- name: create config file
+  copy:
+    dest: '{{ mysql_check_home }}/conf/mysql-check.config'
+    force: no
+    content: "PORT={{ mysql_check_port }}\n"
+  register: mysql_check_config
+
+- name: update permissions
+  file:
+    path: "{{ mysql_check_home }}"
+    owner: "{{ mysql_check_user }}"
+    group: "{{ mysql_check_group }}"
+    recurse: yes
+    mode: '0755'
+
+- name: copy systemd unit mysql-check
+  template:
+    src: mysql-check.service.j2
+    dest: /etc/systemd/system/mysql-check.service
+  register: mysql_check_config
+
+- name: start mysql-check
+  systemd:
+    name: mysql-check
+    enabled: yes
+    state: started
+    daemon_reload: yes
+
+- name: restart mysql-check
+  systemd:
+    name: mysql-check
+    state: restarted
+    daemon_reload: yes
+  when: mysql_check_config is changed

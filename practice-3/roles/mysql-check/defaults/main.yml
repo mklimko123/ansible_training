@@ -1,0 +1,6 @@
+mysql_check_home: /opt/mysql-check/
+mysql_check_user: mysql-check
+mysql_check_group: mysql-check
+mysql_check_url:  https://playpit-labs-assets.s3-eu-west-1.amazonaws.com/mysql-check/mysql-check
+mysql_check_port: 8081
+# defaults file for mysql-check

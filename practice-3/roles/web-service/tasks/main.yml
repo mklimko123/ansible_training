@@ -1,0 +1,15 @@
+- name: modify selinux
+  shell: 'setsebool -P httpd_can_network_connect 1'
+  changed_when: false
+
+- name: copy proxy config
+  template:
+    src: proxy.conf.j2
+    dest: /etc/nginx/default.d/proxy.conf
+  register: nginx_conf
+
+- name: restart nginx
+  systemd:
+    name: nginx
+    state: restarted
+  when: nginx_conf is changed

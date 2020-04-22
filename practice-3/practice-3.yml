@@ -1,0 +1,62 @@
+- hosts: db
+
+  become: yes
+  
+  vars:
+    mysql_root_password:  !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          66316436346166303134363630353563376432363634353135353631643763643662323762333133
+          3432616238323164343434303333313839316434666339650a373563623764333562356134626363
+          62643432323661336663306237666438626137653464643939343965373563656264353438313764
+          3266383163306235390a353136316138626136623565336333386639366132633238616636393339
+          6565
+    mysql_user_password: !vault |
+          $ANSIBLE_VAULT;1.1;AES256
+          31323838616263643139323462353365646362323033343932323438313565666666346336636431
+          6361326162373033656236646632666336663132353261370a663561356636623530393736383266
+          64346430663833373261666564343064356666633838376664383762343132383561323930653666
+          6338303639396331310a346439383132616663393330613665326464616361653837623365323733
+          6133
+
+  roles:
+  - mysql_db
+  - mysql_db_user
+  
+- hosts: app
+
+  gather_facts: yes
+  gather_subset: network
+  become: yes
+  
+  roles:
+  - role: msg-service
+    vars:
+      student_last_name: "{{ 'Klimko' | lower }}"
+      student_first_name: "{{ 'Mikhail' | regex_replace('(^.).*', '\\1') | lower }}"
+
+  - role: mysql-check
+
+  tasks:
+  - name: get app host ip address
+    set_fact:
+      app_host_ip: "{{ ansible_eth0.ipv4.address }}"
+      msg_service_port: "{{ msg_service_port }}"
+      mysql_check_port: "{{ mysql_check_port }}"
+
+- hosts: web
+  
+  become: yes
+ 
+  vars:
+    backends:
+     context: msg-service
+      hostip: "{{ hostvars.app.app_host_ip }}"
+      hostport: "{{ hostvars.app.msg_service_port }}"
+    - context: mysql-check
+      hostip:  "{{ hostvars.app.app_host_ip }}"
+      hostport: "{{ hostvars.app.mysql_check_port }}"
+  
+  roles:
+  - nginx-base
+  - web-service 
+
