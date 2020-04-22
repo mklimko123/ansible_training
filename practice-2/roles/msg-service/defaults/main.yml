@@ -1,8 +1,2 @@
 ---
 # defaults file for msg-service
-msg_service_user: msg-service
-msg_service_group: msg-service
-msg_service_home: /opt/msg-service/
-msg_service_port: 8080
-msg_service_header: "<img width='250' src='https://www.md-webdesigner.com/objectif-libre/wp-content/uploads/2017/05/Ansible.png'>"
-msg_service_message: " <i class='far fa-thumbs-up'></i>Almighty Ansible<p style='font-size: 16pt'>Student: {{ student_first_name }} {{ student_last_name }}</p>"

@@ -1,12 +1,12 @@
-- name: create group mysql-check
+- name: create group {{ mysql_check_group }}
   group:
-    name: mysql-check
+    name: "{{ mysql_check_group }}" 
     state: present
 
 - name: create user mysql-check
   user:
-    name: mysql-check
-    group: mysql-check
+    name: "{{ mysql_check_user }}"
+    group: "{{ mysql_check_group }}"
     state: present
 
 - name: create directory for mysql-check service
@@ -14,27 +14,26 @@
     path: "{{ item }}"
     state: directory
   with_items:
-    - /opt/mysql-check/bin/
-    - /opt/mysql-check/conf/
+    - '{{ mysql_check_home }}/bin/'
+    - '{{ mysql_check_home }}/conf/'
 
 - name: download mysql-check binary file
   get_url:
-    url: https://playpit-labs-assets.s3-eu-west-1.amazonaws.com/mysql-check/mysql-check
-    dest: /opt/mysql-check/bin/
+    url: '{{ mysql_check_url }}'
+    dest: '{{ mysql_check_home }}/bin/'
 
 - name: create config file
   copy:
-    dest: /opt/mysql-check/conf/mysql-check.config
+    dest: '{{ mysql_check_home }}/conf/mysql-check.config'
     force: no
     content: "PORT={{ mysql_check_port }}\n"
-  notify:
-  - restart mysql-check
+  register: mysql_check_config
 
 - name: update permissions
   file:
-    path: /opt/mysql-check
-    owner: mysql-check
-    group: mysql-check
+    path: "{{ mysql_check_home }}"
+    owner: "{{ mysql_check_user }}"
+    group: "{{ mysql_check_group }}"
     recurse: yes
     mode: '0755'
 
@@ -42,8 +41,7 @@
   template:
     src: mysql-check.service.j2
     dest: /etc/systemd/system/mysql-check.service
-  notify:
-  - restart mysql-check
+  register: mysql_check_config
 
 - name: start mysql-check
   systemd:
@@ -51,3 +49,10 @@
     enabled: yes
     state: started
     daemon_reload: yes
+
+- name: restart mysql-check
+  systemd:
+    name: mysql-check
+    state: restarted
+    daemon_reload: yes
+  when: mysql_check_config is changed

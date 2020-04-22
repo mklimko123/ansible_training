@@ -4,10 +4,10 @@ After=network.target
 
 [Service]
 Type=simple
-User=mysql-check
-Group=mysql-check
-EnvironmentFile=-/opt/mysql-check/conf/mysql-check.config
-ExecStart=/opt/mysql-check/bin/mysql-check
+User={{ mysql_check_user }}
+Group={{ mysql_check_group }}
+EnvironmentFile=-{{ mysql_check_home }}/conf/mysql-check.config
+ExecStart={{ mysql_check_home }}/bin/mysql-check
 ExecStop=/bin/kill -s QUIT $MAINPID
 
 [Install]

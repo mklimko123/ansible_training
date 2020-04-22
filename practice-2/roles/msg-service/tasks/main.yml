@@ -3,7 +3,7 @@
     name: "{{ msg_service_group }}"
     state: present
 
-- name: Create user "{{ msg_service_user }}"
+- name: create user "{{ msg_service_user }}"
   user:
     name: "{{ msg_service_user }}"
     group: "{{ msg_service_group }}"
@@ -19,15 +19,14 @@
 
 - name: download binary file
   get_url:
-    url: https://playpit-labs-assets.s3-eu-west-1.amazonaws.com/msg-service/msg-server
+    url: "{{ msg_service_url  }}"
     dest: '{{ msg_service_home }}/bin'
 
 - name: copy config file
   template:
     src: msg-service.config.j2
     dest: '{{ msg_service_home }}/conf/msg-service.config'
-  notify:
-  - restart msg-service
+  register: msg_service_conf
 
 - name: update permissions
   file:
@@ -41,8 +40,7 @@
   template:
     src: msg-service.service.j2
     dest: /etc/systemd/system/msg-service.service
-  notify:
-  - restart msg-service
+  register: msg_service_conf
 
 - name: start msg-service
   systemd:
@@ -50,3 +48,10 @@
     enabled: yes
     state: started
     daemon_reload: yes
+
+- name: restart msg-service
+  systemd:
+    name: msg-service
+    state: restarted
+    daemon_reload: yes
+  when: msg_service_conf is changed
