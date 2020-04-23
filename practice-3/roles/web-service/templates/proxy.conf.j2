@@ -6,3 +6,6 @@ location /{{ backends[1].context }}/ {
     proxy_pass http://{{ backends[1].hostip }}:{{ backends[1].hostport }}/;
 }
 
+location /{{ backends[2].context }}/ {
+    proxy_pass http://{{ backends[2].hostip }}:{{ backends[2].hostport }}/;
+}

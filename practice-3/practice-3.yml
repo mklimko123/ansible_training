@@ -55,6 +55,9 @@
     - context: mysql-check
       hostip:  "{{ hostvars.app.app_host_ip }}"
       hostport: "{{ hostvars.app.mysql_check_port }}"
+    - context: check
+      hostip:  "{{ hostvars.app.app_host_ip }}"
+      hostport: "{{ hostvars.app.mysql_check_port }}"
   
   roles:
   - nginx-base
