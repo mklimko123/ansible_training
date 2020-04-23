@@ -49,7 +49,7 @@
  
   vars:
     backends:
-     context: msg-service
+    - context: msg-service
       hostip: "{{ hostvars.app.app_host_ip }}"
       hostport: "{{ hostvars.app.msg_service_port }}"
     - context: mysql-check
